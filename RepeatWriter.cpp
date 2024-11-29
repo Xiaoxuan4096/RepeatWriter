@@ -1,5 +1,5 @@
 ﻿// RepeatWriter - Repeatly write a string.
-// Version: 1.0.0.6
+// Version: 1.0.0.7
 // Written by Xiaoxuan4096.
 
 #include <iostream>
@@ -23,6 +23,14 @@ namespace Xiaoxuan4096 {
 			std::uniform_int_distribution<> uid{0, 94};
 			return chars[uid(rd)];
 		}
+		void normalisePath(std::wstring& path) { // Delete character \"
+			if (path[0] == '\"') {
+				path.erase(path.begin());
+				path.erase(path.end() - 1);
+			}
+			return;
+		}
+
 		void printStatus(std::wstring str, unsigned long long current, unsigned long long total, unsigned long long totalDigitNumber) {
 			std::wcout << "String = " << str << ", Current = " << std::setw(totalDigitNumber) << current + 1 << ", Total = " << total << ", Rate = " << std::fixed << std::setprecision(2) << std::setw(6) << (100 * (double)(current + 1) / total) << "%." << std::endl;
 			return;
@@ -31,6 +39,7 @@ namespace Xiaoxuan4096 {
 			std::wcout << "String = " << str << ", Current = " << std::setw(totalDigitNumber) << current + 1 << ", Total = " << total << ", Rate = " << std::fixed << std::setprecision(2) << std::setw(6) << (100 * (double)(current + 1) / total) << "%." << std::endl;
 			return;
 		}
+
 		void randomOutput(std::wstring path, unsigned long long total) {
 			std::wfstream fout;
 			fout.open(path, 'w');
@@ -80,6 +89,7 @@ namespace Xiaoxuan4096 {
 			Sleep(3000);
 			return;
 		}
+
 		void main() {
 			unsigned long long total;
 			std::wstring str, path;
@@ -90,6 +100,7 @@ namespace Xiaoxuan4096 {
 			getline(std::wcin, str);
 			std::wcout << "Input path:\n>>> ";
 			getline(std::wcin, path);
+			normalisePath(path);
 			if (str == L"")
 				randomOutput(path, total);
 			else
