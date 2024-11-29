@@ -1,5 +1,5 @@
 ﻿// RepeatWriter - Repeatly write a string.
-// Version: 1.0.0.5
+// Version: 1.0.0.6
 // Written by Xiaoxuan4096.
 
 #include <iostream>
@@ -8,18 +8,10 @@
 #include <string>
 #include <random>
 
-#include <cstdlib>
-
 #include <Windows.h>
 
 namespace Xiaoxuan4096 {
 	namespace Public {
-		void setOutput(unsigned long long current, unsigned long long total) {
-			system("cls");
-			HANDLE hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-			SetConsoleTextAttribute(hOutput, (int)(14 * (double)(current + 1) / total) + 1);
-			return;
-		}
 		unsigned long long getDigitNumber(unsigned long long x) {
 			unsigned long long sum = 0;
 			for (; x > 0; x /= 10, sum++);
@@ -49,7 +41,6 @@ namespace Xiaoxuan4096 {
 			}
 			unsigned long long totalDigitNumber = getDigitNumber(total);
 			for (unsigned long long i = 0; i < total; i++) {
-				setOutput(i, total);
 				char tmp = getRandomChar();
 				fout << tmp;
 				if (fout.fail() || fout.bad()) {
@@ -75,7 +66,6 @@ namespace Xiaoxuan4096 {
 			}
 			unsigned long long totalDigitNumber = getDigitNumber(total);
 			for (unsigned long long i = 0; i < total; i++) {
-				setOutput(i, total);
 				fout << str;
 				if (fout.fail() || fout.bad()) {
 					fout.close();
