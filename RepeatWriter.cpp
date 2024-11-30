@@ -1,5 +1,5 @@
 ﻿// RepeatWriter - Repeatly write a string.
-// Version: 1.1.0.0
+// Version: 1.1.1.5
 // Written by Xiaoxuan4096.
 
 #include <iostream>
@@ -86,8 +86,16 @@ namespace Xiaoxuan4096 {
 			std::wcout << "String = " << str << ", Current = " << std::setw(totalDigitNumber) << current + 1 << ", Total = " << total << ", Rate = " << std::fixed << std::setprecision(2) << std::setw(6) << (100 * (double)(current + 1) / total) << "%." << std::endl;
 			return;
 		}
+		static void printStatus(std::wstring str, unsigned long long current, unsigned long long total, unsigned long long totalDigitNumber, unsigned long long currentFile, unsigned long long totalFile, unsigned long long totalFileDigitNumber) {
+			std::wcout << "String = " << str << ", Current = " << std::setw(totalDigitNumber) << current + 1 << ", Total = " << total << ", SingleRate = " << std::fixed << std::setprecision(2) << std::setw(6) << (100 * (double)(current + 1) / total) << "%, CurrentFile = " << std::setw(totalFileDigitNumber) << currentFile + 1 << ", TotalFile = " << totalFile << ", TotalRate = " << std::fixed << std::setprecision(2) << std::setw(6) << (100 * (double)(currentFile * total + current + 1) / (totalFile * total)) << "%." << std::endl;
+			return;
+		}
+		static void printStatus(unsigned long long current, unsigned long long total, unsigned long long totalDigitNumber, unsigned long long currentFile, unsigned long long totalFile, unsigned long long totalFileDigitNumber, char str) {
+			std::wcout << "String = " << str << ", Current = " << std::setw(totalDigitNumber) << current + 1 << ", Total = " << total << ", SingleRate = " << std::fixed << std::setprecision(2) << std::setw(6) << (100 * (double)(current + 1) / total) << "%, CurrentFile = " << std::setw(totalFileDigitNumber) << currentFile + 1 << ", TotalFile = " << totalFile << ", TotalRate = " << std::fixed << std::setprecision(2) << std::setw(6) << (100 * (double)(currentFile * total + current + 1) / (totalFile * total)) << "%." << std::endl;
+			return;
+		}
 
-		static void randomOutput(std::wstring path, unsigned long long total) {
+		static void randomOutput(std::wstring path, unsigned long long total, bool config = false, unsigned long long currentFile = 1, unsigned long long totalFile = 1) {
 			std::wfstream fout;
 			fout.open(path, std::ios::out);
 			if (!fout.is_open()) {
@@ -97,24 +105,29 @@ namespace Xiaoxuan4096 {
 				Sleep(3000);
 				return;
 			}
-			unsigned long long totalDigitNumber = getDigitNumber(total);
+			unsigned long long totalDigitNumber = getDigitNumber(total), totalFileNumber = getDigitNumber(totalFile);
 			for (unsigned long long i = 0; i < total; i++) {
 				char tmp = getRandomChar();
 				fout << tmp;
 				if (fout.fail() || fout.bad()) {
 					fout.close();
-					std::wcerr << "Failed to write string: " << tmp << ",to file: " << path << '!' << std::endl;
+					std::wcerr << "Failed to write string: " << tmp << ", to file: " << path << '!' << std::endl;
 					Sleep(3000);
 					return;
 				}
-				printStatus(i, total, totalDigitNumber, tmp);
+				if (config)
+					printStatus(i, total, totalDigitNumber, currentFile, totalFile, totalFileNumber, tmp);
+				else
+					printStatus(i, total, totalDigitNumber, tmp);
 			}
 			fout.close();
-			std::wcout << "Successfully write random string to file: " << path << '!' << std::endl;
-			Sleep(3000);
+			if (!config) {
+				std::wcout << "Successfully write random string to file: " << path << '!' << std::endl;
+				Sleep(3000);
+			}
 			return;
 		}
-		static void defaultOutput(std::wstring path, std::wstring str, unsigned long long total) {
+		static void defaultOutput(std::wstring path, std::wstring str, unsigned long long total, bool config = false, unsigned long long currentFile = 1, unsigned long long totalFile = 1) {
 			std::wfstream fout;
 			fout.open(path, std::ios::out);
 			if (!fout.is_open()) {
@@ -124,20 +137,25 @@ namespace Xiaoxuan4096 {
 				Sleep(3000);
 				return;
 			}
-			unsigned long long totalDigitNumber = getDigitNumber(total);
+			unsigned long long totalDigitNumber = getDigitNumber(total), totalFileNumber = getDigitNumber(totalFile);
 			for (unsigned long long i = 0; i < total; i++) {
 				fout << str;
 				if (fout.fail() || fout.bad()) {
 					fout.close();
-					std::wcerr << "Failed to write string: " << str << ",to file: " << path << '!' << std::endl;
+					std::wcerr << "Failed to write string: " << str << ", to file: " << path << '!' << std::endl;
 					Sleep(3000);
 					return;
 				}
-				printStatus(str, i, total, totalDigitNumber);
+				if (config)
+					printStatus(str, i, total, totalDigitNumber, currentFile, totalFile, totalFileNumber);
+				else
+					printStatus(str, i, total, totalDigitNumber);
 			}
 			fout.close();
-			std::wcout << "Successfully write string: " << str << ",to file: " << path << '!' << std::endl;
-			Sleep(3000);
+			if (!config) {
+				std::wcout << "Successfully write string: " << str << ", to file: " << path << '!' << std::endl;
+				Sleep(3000);
+			}
 			return;
 		}
 
@@ -161,6 +179,7 @@ namespace Xiaoxuan4096 {
 			getline(std::wcin, configPath);
 			if (configPath == L"")
 				configPath = L"configExample.ini";
+			normalisePath(configPath);
 			readConfigFile(configPath, fileNum, total, folderPath, fileName, str);
 			if (fileNum == 1)
 				if (str == L"")
@@ -168,22 +187,28 @@ namespace Xiaoxuan4096 {
 				else
 					defaultOutput(folderPath + L'/' + fileName, str, total);
 			else
-				if (str == L"")
+				if (str == L"") {
 					for (unsigned long long i = 0; i < fileNum; i++) {
 						std::wstring number;
 						std::wstringstream ss;
 						ss << i + 1;
 						ss >> number;
-						randomOutput(number + L" - " + folderPath + fileName, total);
+						randomOutput(folderPath + L'/' + number + L" - " + fileName, total, true, i, fileNum);
 					}
-				else
+					std::wcout << "Successfully write random string to files: " << folderPath + L'/' + fileName << '!' << std::endl;
+					Sleep(3000);
+				}
+				else {
 					for (unsigned long long i = 0; i < fileNum; i++) {
 						std::wstring number;
 						std::wstringstream ss;
 						ss << i + 1;
 						ss >> number;
-						defaultOutput(number + L" - " + folderPath + fileName, str, total);
+						defaultOutput(folderPath + L'/' + number + L" - " + fileName, str, total, true, i, fileNum);
 					}
+					std::wcout << "Successfully write string: " << str << ", to files: " << folderPath + L'/' + fileName << '!' << std::endl;
+					Sleep(3000);
+				}
 			return;
 		}
 
