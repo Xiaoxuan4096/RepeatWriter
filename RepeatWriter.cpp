@@ -1,10 +1,11 @@
 ﻿// RepeatWriter - Repeatly write a string.
-// Version: 1.0.0.7
+// Version: 1.1.0.0
 // Written by Xiaoxuan4096.
 
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <random>
 
@@ -12,39 +13,87 @@
 
 namespace Xiaoxuan4096 {
 	namespace Public {
-		unsigned long long getDigitNumber(unsigned long long x) {
+		static unsigned long long getDigitNumber(unsigned long long x) {
 			unsigned long long sum = 0;
 			for (; x > 0; x /= 10, sum++);
 			return sum;
 		}
-		char getRandomChar() {
+		static char getRandomChar() {
 			const char chars[96] = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 			std::random_device rd;
 			std::uniform_int_distribution<> uid{0, 94};
 			return chars[uid(rd)];
 		}
-		void normalisePath(std::wstring& path) { // Delete character \"
+		static void normalisePath(std::wstring& path) { // Delete character \"
 			if (path[0] == '\"') {
 				path.erase(path.begin());
 				path.erase(path.end() - 1);
 			}
 			return;
 		}
+		static void readConfigFile(std::wstring configPath, unsigned long long& fileNum, unsigned long long& total, std::wstring& folderPath, std::wstring& fileName, std::wstring& str) {
+			std::wfstream fin;
+			std::wstring tmp;
+			fin.open(configPath, std::ios::in);
+			if (!fin.is_open()) {
+				std::wcerr << "Failed to open config file: " << configPath << '!' << std::endl;
+				Sleep(3000);
+				return;
+			}
+			while (getline(fin, tmp)) {
+				if (fin.fail() || fin.bad()) {
+					fin.close();
+					std::wcerr << "Failed to read config file: " << configPath << '!' << std::endl;
+					Sleep(3000);
+					return;
+				}
+				if (tmp == L"" || tmp[0] == '#')
+					continue;
+				std::wstring tkey = L"", tvalue = L"";
+				size_t i;
+				for (i = 0; tmp[i] != ' ' && i < tmp.size(); i++)
+					tkey += tmp[i];
+				for (; tmp[i] != '='; i++);
+				for (; tmp[i] != '\"'; i++);
+				for (i += 1; i < tmp.size(); i++)
+					tvalue += tmp[i];
+				tvalue.erase(tvalue.end() - 1); // Remove \".
+				if (tkey == L"FileNumber") {
+					std::wstringstream ss;
+					ss << tvalue;
+					ss >> fileNum;
+				}
+				if (tkey == L"FolderPath")
+					folderPath = tvalue;
+				if (tkey == L"FileName")
+					fileName = tvalue;
+				if (tkey == L"String")
+					str = tvalue;
+				if (tkey == L"Total") {
+					std::wstringstream ss;
+					ss << tvalue;
+					ss >> total;
+				}
+			}
+			return;
+		}
 
-		void printStatus(std::wstring str, unsigned long long current, unsigned long long total, unsigned long long totalDigitNumber) {
+		static void printStatus(std::wstring str, unsigned long long current, unsigned long long total, unsigned long long totalDigitNumber) {
 			std::wcout << "String = " << str << ", Current = " << std::setw(totalDigitNumber) << current + 1 << ", Total = " << total << ", Rate = " << std::fixed << std::setprecision(2) << std::setw(6) << (100 * (double)(current + 1) / total) << "%." << std::endl;
 			return;
 		}
-		void printStatus(unsigned long long current, unsigned long long total, unsigned long long totalDigitNumber, char str) {
+		static void printStatus(unsigned long long current, unsigned long long total, unsigned long long totalDigitNumber, char str) {
 			std::wcout << "String = " << str << ", Current = " << std::setw(totalDigitNumber) << current + 1 << ", Total = " << total << ", Rate = " << std::fixed << std::setprecision(2) << std::setw(6) << (100 * (double)(current + 1) / total) << "%." << std::endl;
 			return;
 		}
 
-		void randomOutput(std::wstring path, unsigned long long total) {
+		static void randomOutput(std::wstring path, unsigned long long total) {
 			std::wfstream fout;
-			fout.open(path, 'w');
+			fout.open(path, std::ios::out);
 			if (!fout.is_open()) {
-				std::wcout << "Failed to open file: " << path << '!' << std::endl;
+				std::wcerr << "Failed to open file: " << path << '!' << std::endl
+					<< "This program can only write to existing folders." << std::endl
+					<< "Try to create the folder manually." << std::endl;
 				Sleep(3000);
 				return;
 			}
@@ -54,7 +103,7 @@ namespace Xiaoxuan4096 {
 				fout << tmp;
 				if (fout.fail() || fout.bad()) {
 					fout.close();
-					std::wcout << "Failed to write string: " << tmp << ",to file: " << path << '!' << std::endl;
+					std::wcerr << "Failed to write string: " << tmp << ",to file: " << path << '!' << std::endl;
 					Sleep(3000);
 					return;
 				}
@@ -65,11 +114,13 @@ namespace Xiaoxuan4096 {
 			Sleep(3000);
 			return;
 		}
-		void defaultOutput(std::wstring path, std::wstring str, unsigned long long total) {
+		static void defaultOutput(std::wstring path, std::wstring str, unsigned long long total) {
 			std::wfstream fout;
-			fout.open(path, 'w');
+			fout.open(path, std::ios::out);
 			if (!fout.is_open()) {
-				std::wcout << "Failed to open file: " << path << '!' << std::endl;
+				std::wcerr << "Failed to open file: " << path << '!' << std::endl
+					<< "This program can only write to existing folders." << std::endl
+					<< "Try to create the folder manually." << std::endl;
 				Sleep(3000);
 				return;
 			}
@@ -78,7 +129,7 @@ namespace Xiaoxuan4096 {
 				fout << str;
 				if (fout.fail() || fout.bad()) {
 					fout.close();
-					std::wcout << "Failed to write string: " << str << ",to file: " << path << '!' << std::endl;
+					std::wcerr << "Failed to write string: " << str << ",to file: " << path << '!' << std::endl;
 					Sleep(3000);
 					return;
 				}
@@ -90,21 +141,61 @@ namespace Xiaoxuan4096 {
 			return;
 		}
 
-		void main() {
-			unsigned long long total;
+		static void useInterface(unsigned long long total) {
 			std::wstring str, path;
-			std::wcout << "Input total:\n>>> ";
-			std::cin >> total;
-			getchar(); // Avoid inputing a blank character.
-			std::wcout << "Input string(leave blank for random characters):\n>>> ";
+			std::cout << "Input string(leave blank for random characters):\n>>> ";
 			getline(std::wcin, str);
-			std::wcout << "Input path:\n>>> ";
+			std::cout << "Input path:\n>>> ";
 			getline(std::wcin, path);
 			normalisePath(path);
 			if (str == L"")
 				randomOutput(path, total);
 			else
 				defaultOutput(path, str, total);
+			return;
+		}
+		static void useConfigFile() {
+			std::wstring configPath, folderPath, fileName, str;
+			unsigned long long total, fileNum;
+			std::cout << "Input config file path(leave blank to use configExample.ini):\n>>> ";
+			getline(std::wcin, configPath);
+			if (configPath == L"")
+				configPath = L"configExample.ini";
+			readConfigFile(configPath, fileNum, total, folderPath, fileName, str);
+			if (fileNum == 1)
+				if (str == L"")
+					randomOutput(folderPath + L'/' + fileName, total);
+				else
+					defaultOutput(folderPath + L'/' + fileName, str, total);
+			else
+				if (str == L"")
+					for (unsigned long long i = 0; i < fileNum; i++) {
+						std::wstring number;
+						std::wstringstream ss;
+						ss << i + 1;
+						ss >> number;
+						randomOutput(number + L" - " + folderPath + fileName, total);
+					}
+				else
+					for (unsigned long long i = 0; i < fileNum; i++) {
+						std::wstring number;
+						std::wstringstream ss;
+						ss << i + 1;
+						ss >> number;
+						defaultOutput(number + L" - " + folderPath + fileName, str, total);
+					}
+			return;
+		}
+
+		void main() {
+			unsigned long long total;
+			std::cout << "Input total(input 0 to read config file):\n>>> ";
+			std::cin >> total;
+			getchar();
+			if (total == 0)
+				useConfigFile();
+			else
+				useInterface(total);
 			return;
 		}
 	}

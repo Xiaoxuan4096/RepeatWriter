@@ -129,6 +129,9 @@
   <ItemGroup>
     <ClCompile Include="RepeatWriter.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="configExample.ini" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
