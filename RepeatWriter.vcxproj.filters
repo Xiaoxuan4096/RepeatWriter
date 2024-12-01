@@ -33,7 +33,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="icon1.ico">
+    <Image Include="defaultIcon.ico">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>
