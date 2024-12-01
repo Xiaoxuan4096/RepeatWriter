@@ -20,7 +20,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="configExample.ini" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
