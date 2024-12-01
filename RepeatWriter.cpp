@@ -1,5 +1,5 @@
 ﻿// RepeatWriter - Repeatly write a string.
-// Version: 1.1.1.6
+// Version: 1.1.1.7
 // Written by Xiaoxuan4096.
 
 #include <iostream>
@@ -176,10 +176,8 @@ namespace Xiaoxuan4096 {
 			std::wstring configPath, folderPath, fileName, str;
 			unsigned long long total, fileNum;
 			bool succeed = true;
-			std::cout << "Input config file path(leave blank to use configExample.ini):\n>>> ";
+			std::cout << "Input config file path:\n>>> ";
 			getline(std::wcin, configPath);
-			if (configPath == L"")
-				configPath = L"configExample.ini";
 			normalisePath(configPath);
 			readConfigFile(configPath, fileNum, total, folderPath, fileName, str);
 			if (fileNum == 1)
