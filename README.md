@@ -9,7 +9,7 @@ RepeatWriter 已经结束支持，不再进行任何更新。
 
 版本 1.1.1.7 是最后版本。
 
-如需二进制文件，请访问(RepeatWriter 的 GitHub 仓库)[https://github.com/Xiaoxuan4096/RepeatWriter]。
+如需二进制文件，请访问[RepeatWriter 的 GitHub 仓库](https://github.com/Xiaoxuan4096/RepeatWriter)。
 ### 版本1.1.1.7（当前版本） 2024/12/01
 版本 1.1.1.7：针对版本 1.1.1.6 中的小问题进行优化，添加应用程序图标。
 
